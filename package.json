@@ -1,9 +1,15 @@
 {
   "name": "@dbwebb/webtec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI to work with the webtec source, for staff and student.",
   "license": "MIT",
-  "keywords": ["dbwebb", "webtec", "tool", "cli", "bash"],
+  "keywords": [
+    "dbwebb",
+    "webtec",
+    "tool",
+    "cli",
+    "bash"
+  ],
   "author": "Mikael Roos",
   "main": "index.js",
   "scripts": {
