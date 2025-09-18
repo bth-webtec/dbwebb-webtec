@@ -18,8 +18,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": ["bin"],
   "bin": {
-    "check": "./bin/check.bash",
-    "help": "./bin/help.bash"
+    "check": "./bin/dbw-check.bash",
+    "help": "./bin/dbw-help.bash"
   }
 }
