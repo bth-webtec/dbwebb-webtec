@@ -1,6 +1,6 @@
 {
   "name": "@dbwebb/webtec",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "CLI to work with the webtec source, for staff and student.",
   "license": "MIT",
   "keywords": [
@@ -18,7 +18,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["bin"],
+  "files": [
+    "bin"
+  ],
   "bin": {
     "check": "./bin/dbw-check.bash",
     "help": "./bin/dbw-help.bash"
