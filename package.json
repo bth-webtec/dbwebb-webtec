@@ -1,0 +1,19 @@
+{
+  "name": "@dbwebb/webtec",
+  "version": "1.0.0",
+  "description": "CLI to work with the webtec source, for staff and student.",
+  "license": "MIT",
+  "keywords": ["dbwebb", "webtec", "tool", "cli", "bash"],
+  "author": "Mikael Roos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "check": "./bin/check.bash",
+    "help": "./bin/help.bash"
+  }
+}
