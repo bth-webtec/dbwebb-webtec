@@ -10,12 +10,7 @@
 
 
 # Name of the script
-SCRIPT=$( basename "$0" )
-
-# Current version
-VERSION="1.2.1"
-
-
+#SCRIPT=$( basename "$0" )
 
 ##
 # Message to display for version.
@@ -157,12 +152,12 @@ check_branches ()
             success=1
         fi
 
-        if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
-            [[ -n "$verbose" ]] && echo "✅ $branch finns i din remote"
-        else
-            [[ -n "$verbose" ]] && echo "❌ $branch saknas i din remote"
-            success=1
-        fi
+        # if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+        #     [[ -n "$verbose" ]] && echo "✅ $branch finns i din remote"
+        # else
+        #     [[ -n "$verbose" ]] && echo "❌ $branch saknas i din remote"
+        #     success=1
+        # fi
     done
 
     return $success

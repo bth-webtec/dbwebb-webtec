@@ -10,8 +10,7 @@
     "cli",
     "bash"
   ],
-  "author": "Mikael Roos",
-  "main": "index.js",
+  "author": "Mikael Roos, Kenneth Lewenhagen",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,7 +21,6 @@
     "bin"
   ],
   "bin": {
-    "check": "./bin/dbw-check.bash",
-    "help": "./bin/dbw-help.bash"
+    "webtec": "./bin/dbw-webtec.bash"
   }
 }

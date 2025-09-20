@@ -19,7 +19,7 @@ npm i @dbwebb/webtec
 You can update to the latest version like this.
 
 ```bash
-npm update @dbwebb/webtec
+npm update @dbwebb/webtec@latest
 ```
 
 
@@ -41,6 +41,14 @@ npx @dbwebb/webtec check kmom02
 npx @dbwebb/webtec check kmom03
 ```
 
+When you run kmom01, it will also check labbmiljo.
+
+When you run kmom02, it will also check kmom01 and labbmiljo (and so on).
+
+
+
+## To be done
+
 These will be supported but are yet not implemented.
 
 ```bash
@@ -49,10 +57,6 @@ npx @dbwebb/webtec check kmom05
 npx @dbwebb/webtec check kmom06
 npx @dbwebb/webtec check kmom10
 ```
-
-When you run kmom01, it will also check labbmiljo.
-
-When you run kmom02, it will also check kmom01 and labbmiljo (and so on).
 
 
 
