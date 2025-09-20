@@ -42,6 +42,7 @@ usage ()
 "  kmom03                           Checks related to kmom03."
 ""
 "Options:"
+"  --no-eslint    Ignore checking with eslint."
 "  --help, -h     Print help."
 "  --version, -h  Print version."
     )
@@ -105,6 +106,71 @@ function openUrl {
 
 
 ##
+# Check if the git tag is between two versions
+# >=@arg2 and <@arg3
+#
+# @arg1 string the path to the dir to check.
+# @arg2 string the lowest version number to check.
+# @arg3 string the highest version number to check.
+#
+hasGitTagBetween()
+{
+    local where="$1"
+    local low=
+    local high=
+    local semTag=
+
+    low=$( getSemanticVersion "$2" )
+    high=$( getSemanticVersion "$3" )
+    #echo "Validate that tag exists >=$2 and <$3 ."
+
+    local success=false
+    local highestTag=0
+    local highestSemTag=0
+
+    if [ -d "$where" ]; then
+        while read -r tag; do
+            semTag=$( getSemanticVersion "$tag" )
+            #echo "trying tag $tag = $semTag"
+            if [ $semTag -ge $low -a $semTag -lt $high ]; then
+                #echo "success with $tag"
+                success=
+                if [ $semTag -gt $highestSemTag ]; then
+                    highestTag=$tag
+                    highestSemTag=$semTag
+                fi
+            fi
+        done < <( cd "$where" && git tag )
+    fi
+
+    if [ "$success" = "false" ]; then
+        printf "$MSG_FAILED Failed to validate tag exists >=%s and <%s." "$2" "$3"
+        return 1
+    fi
+
+    echo "$highestTag"
+}
+
+
+
+##
+# Convert version to a comparable string
+# Works for 1.0.0 and v1.0.0
+#
+# @arg1 string the version to check.
+#
+function getSemanticVersion
+{
+    #local version=${1:1}
+    local version=
+    
+    version=$( echo $1 | sed s/^[vV]// )
+    echo "$version" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }'
+}
+
+
+
+##
 # Check if paths (files and dirs) exists.
 #
 # param array of paths
@@ -152,6 +218,7 @@ check_branches ()
             success=1
         fi
 
+        # Remote branches
         # if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
         #     [[ -n "$verbose" ]] && echo "✅ $branch finns i din remote"
         # else
@@ -161,6 +228,136 @@ check_branches ()
     done
 
     return $success
+}
+
+
+
+##
+# Check paths for a kmom
+#
+kmom_check_paths ()
+{
+    local silent="$1"
+    local pathArray="$2"
+    local success=0
+
+    check_paths "$pathArray" || ([[ ! $silent ]] && check_paths "$pathArray" verbose)
+    if (( $? == 0 )); then
+        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
+    else
+        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
+# Check git repo has a tag
+#
+kmom_check_tag ()
+{
+    local silent="$1"
+    local kmom="$2"
+    local tagMin="$3"
+    local tagMax="$4"
+    local dir="."
+    local success=0
+    local res=
+
+    res=$( hasGitTagBetween "$dir" "$tagMin" "$tagMax" )
+    if (( $? == 0 )); then
+        [[ $silent ]] || echo "✅ $kmom repot har tag $res 😀."
+    else
+        [[ $silent ]] || echo "🚫 $kmom repot saknar tagg >=$2 and <$3, fixa det 🔧."
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
+# Check repo passes eslint
+#
+kmom_eslint ()
+{
+    local silent="$1"
+    local kmom="$2"
+    local path="$3"
+    local success=0
+    local res=
+
+    (( NO_ESLINT )) && return 0
+
+    res=$( npx eslint public )
+    if (( $? == 0 )); then
+        [[ $silent ]] || echo "✅ $kmom eslint passerar 😀."
+    else
+        [[ $silent ]] || echo "🚫 $kmom eslint hittade fel, kör eslint mot $path och fixa det 🔧."
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
+# Do tests for a kmom.
+#
+kmom_do ()
+{
+    local success=0
+    local silent="$1"
+    local previous_kmom="$2"
+    local kmom="$3"
+    local pathArray="$4"
+    local versionMin="$5"
+    local versionMax="$6"
+
+    app_"$previous_kmom" silent
+    (( $? != 0 )) && success=2
+
+    kmom_check_paths "$silent" "$pathArray"
+    (( $? != 0 )) && success=1
+
+    kmom_check_tag "$silent" "$kmom" "$versionMin" "$versionMax"
+    (( $? != 0 )) && success=1
+
+    if [[ ! $silent ]]; then
+        kmom_eslint "$silent" "$kmom" "public/"
+        (( $? != 0 )) && success=1
+    fi
+
+    # Räkna antalet commits
+    # npx http-server och testa de routes som skall fungera
+    # Kör labben och se till att den är minst 15p, visa även om det är bättre
+
+    kmom_summary "$silent" $success "$kmom"
+}
+
+
+
+##
+# Print the summary for each kmom.
+#
+kmom_summary ()
+{
+    local silent="$1"
+    local success=$2
+    local kmom="$3"
+
+    if [[ $silent ]]; then
+        if (( success == 0)); then
+            echo "✅ $kmom OK 😀."
+        else
+            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
+        fi
+    fi
 }
 
 
@@ -214,13 +411,8 @@ app_labbmiljo ()
     local kmom="Labbmiljö"
     local success=0
 
-    check_paths PATHS_LABBMILJO[@] || ([[ ! $silent ]] && check_paths PATHS_LABBMILJO[@] verbose)
-    if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
-    else
-        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
-        success=1
-    fi
+    kmom_check_paths "$silent" PATHS_LABBMILJO[@]
+    success=$?
 
     check_branches || ([[ ! $silent ]] && check_branches verbose)
     if (( $? == 0 )); then
@@ -230,17 +422,15 @@ app_labbmiljo ()
         success=1
     fi
 
+    if [[ ! $silent ]]; then
+        kmom_eslint "$silent" "$kmom" "./"
+        (( $? != 0 )) && success=1
+    fi
+
     # Kolla att repot har rätt namn
-    # npx eslint
     # npx http-server ?
 
-    if [[ $silent ]]; then
-        if (( success == 0)); then
-            echo "✅ $kmom OK 😀."
-        else
-            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
-        fi
-    fi
+    kmom_summary "$silent" $success "$kmom"
 
     return $success
 }
@@ -252,36 +442,17 @@ app_labbmiljo ()
 #
 app_kmom01 ()
 {
-    local silent="$1"
     local success=0
+    local silent="$1"
     local previous_kmom="labbmiljo"
     local kmom="kmom01"
-    local res=
+    local pathArray="PATHS_KMOM01[@]"
+    local versionMin="v1.0.0"
+    local versionMax="v2.0.0"
 
-    app_$previous_kmom silent
-    (( $? != 0 )) && success=2
-
-    check_paths PATHS_KMOM01[@] || ([[ ! $silent ]] && check_paths PATHS_KMOM01[@] verbose)
-    if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
-    else
-        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
-        success=1
-    fi
-
-    # Kolla om rätt tagg finns
-    # Räkna antalet commits
-    # npx eslint
-    # npx http-server och testa de routes som skall fungera
-    # Kör labben och se till att den är minst 15p, visa även om det är bättre
-
-    if [[ $silent ]]; then
-        if (( success == 0)); then
-            echo "✅ $kmom OK 😀."
-        else
-            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
-        fi
-    fi
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    res=$?
+    (( res != 0 )) && success=$res
 
     return $success
 }
@@ -297,32 +468,13 @@ app_kmom02 ()
     local success=0
     local previous_kmom="kmom01"
     local kmom="kmom02"
-    local res=
+    local pathArray="PATHS_KMOM02[@]"
+    local versionMin="v2.0.0"
+    local versionMax="v3.0.0"
 
-    app_$previous_kmom silent
-    (( $? != 0 )) && success=2
-
-    check_paths PATHS_KMOM02[@] || ([[ ! $silent ]] && check_paths PATHS_KMOM02[@] verbose)
-    if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
-    else
-        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
-        success=1
-    fi
-
-    # Kolla om rätt tagg finns
-    # Räkna antalet commits
-    # npx eslint
-    # npx http-server och testa de routes som skall fungera
-    # Kör labben och se till att den är minst 15p, visa även om det är bättre
-
-    if [[ $silent ]]; then
-        if (( success == 0)); then
-            echo "✅ $kmom OK 😀."
-        else
-            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
-        fi
-    fi
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    res=$?
+    (( res != 0 )) && success=$res
 
     return $success
 }
@@ -338,33 +490,15 @@ app_kmom03 ()
     local success=0
     local previous_kmom="kmom02"
     local kmom="kmom03"
-    local res=
+    local pathArray="PATHS_KMOM03[@]"
+    local versionMin="v3.0.0"
+    local versionMax="v4.0.0"
 
-    app_$previous_kmom silent
-    (( $? != 0 )) && success=2
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    res=$?
+    (( res != 0 )) && success=$res
 
-    check_paths PATHS_KMOM03[@] || ([[ ! $silent ]] && check_paths PATHS_KMOM03[@] verbose)
-    if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
-    else
-        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
-        success=1
-    fi
-
-    # Kolla om rätt tagg finns
-    # Räkna antalet commits
-    # npx eslint
-    # npx http-server och testa de routes som skall fungera
     # kontrollera att PR är korrekt gjord för kmom03
-    # Kör labben och se till att den är minst 15p, visa även om det är bättre
-
-    if [[ $silent ]]; then
-        if (( success == 0)); then
-            echo "✅ $kmom OK 😀."
-        else
-            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
-        fi
-    fi
 
     return $success
 }
@@ -382,6 +516,11 @@ main ()
     while (( $# ))
     do
         case "$1" in
+
+            --no-eslint)
+                NO_ESLINT=1
+                shift
+            ;;
 
             --help | -h)
                 usage
