@@ -9,7 +9,7 @@ A cli to work with the course webtec, for students and staff.
 You can install the tool through npm as this.
 
 ```bash
-npm i @dbwebb/webtec
+npm i @dbwebb/webtec --save-dev
 ```
 
 
