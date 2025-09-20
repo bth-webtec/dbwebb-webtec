@@ -1,6 +1,6 @@
 {
   "name": "@dbwebb/webtec",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "CLI to work with the webtec source, for staff and student.",
   "license": "MIT",
   "keywords": [
