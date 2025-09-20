@@ -32,8 +32,8 @@ version ()
 usage ()
 {
     local txt=(
-"Work with a course by connecting to Canvas and GitHub."
-"Usage: $SCRIPT [options] <command> [arguments]"
+"Check that your repo contains the essentials for each part of the course."
+"Usage: $SCRIPT check [options] <command> [arguments]"
 ""
 "Command:"
 "  labbmiljo                        Checks related to the labbmiljö."

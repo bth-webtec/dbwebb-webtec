@@ -24,7 +24,7 @@ npm update @dbwebb/webtec@latest
 
 
 
-## Execute the command
+## Execute the `check` command
 
 You can execute the command like this and the result is a helptext on how to use the command.
 
@@ -44,6 +44,12 @@ npx @dbwebb/webtec check kmom03
 When you run kmom01, it will also check labbmiljo.
 
 When you run kmom02, it will also check kmom01 and labbmiljo (and so on).
+
+You can get a helptext like this.
+
+```bash
+npx @dbwebb/webtec check --help
+```
 
 
 
