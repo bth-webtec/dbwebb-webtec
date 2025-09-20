@@ -43,6 +43,7 @@ usage ()
 ""
 "Options:"
 "  --no-eslint    Ignore checking with eslint."
+"  --pass-lab     Run the lab towards the solution file to pass the check."
 "  --help, -h     Print help."
 "  --version, -h  Print version."
     )
@@ -243,9 +244,9 @@ kmom_check_paths ()
 
     check_paths "$pathArray" || ([[ ! $silent ]] && check_paths "$pathArray" verbose)
     if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla kataloger/filer finns på plats 😀."
+        [[ $silent ]] || echo "✅ 😀 $kmom alla kataloger/filer finns på plats."
     else
-        [[ $silent ]] || echo "🚫 $kmom någon katalog/fil saknas eller har fel namn, fixa det 🔧."
+        [[ $silent ]] || echo "🚫 🔧 $kmom någon katalog/fil saknas eller har fel namn, fixa det."
         success=1
     fi
 
@@ -269,9 +270,9 @@ kmom_check_tag ()
 
     res=$( hasGitTagBetween "$dir" "$tagMin" "$tagMax" )
     if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom repot har tag $res 😀."
+        [[ $silent ]] || echo "✅ 😀 $kmom repot har tag $res."
     else
-        [[ $silent ]] || echo "🚫 $kmom repot saknar tagg >=$2 and <$3, fixa det 🔧."
+        [[ $silent ]] || echo "🚫 🔧 $kmom repot saknar tagg >=$2 and <$3, fixa det."
         success=1
     fi
 
@@ -295,9 +296,38 @@ kmom_eslint ()
 
     res=$( npx eslint public )
     if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom eslint passerar 😀."
+        [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
     else
-        [[ $silent ]] || echo "🚫 $kmom eslint hittade fel, kör eslint mot $path och fixa det 🔧."
+        [[ $silent ]] || echo "🚫 🔧 $kmom eslint hittade fel, kör eslint mot $path och fixa det."
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
+# Check labs in a kmom
+#
+kmom_check_lab ()
+{
+    local silent="$1"
+    local kmom="$2"
+    local lab="$3"
+    local success=0
+    local res=
+
+    res=$( cd "lab/$lab" || return 0; node lab "$PASS_LAB" )
+    res=$?
+    if (( res >= 21 )); then
+        [[ $silent ]] || echo "✅ 🙌 $kmom $lab imponerar med ${res}p."
+    elif (( res >= 19 )); then
+        [[ $silent ]] || echo "✅ 😍 $kmom $lab väl godkänd med ${res}p."
+    elif (( res >= 15 )); then
+        [[ $silent ]] || echo "✅ 😁 $kmom $lab passerar med ${res}p."
+    else
+        [[ $silent ]] || echo "🚫 🔧 $kmom $lab med ${res}p passerar inte gränsen för godkänt, fixa det."
         success=1
     fi
 
@@ -318,6 +348,7 @@ kmom_do ()
     local pathArray="$4"
     local versionMin="$5"
     local versionMax="$6"
+    local lab="$7"
 
     app_"$previous_kmom" silent
     (( $? != 0 )) && success=2
@@ -327,6 +358,11 @@ kmom_do ()
 
     kmom_check_tag "$silent" "$kmom" "$versionMin" "$versionMax"
     (( $? != 0 )) && success=1
+
+    if [[ $lab ]]; then
+        kmom_check_lab "$silent" "$kmom" "$lab"
+        (( $? != 0 )) && success=1
+    fi
 
     if [[ ! $silent ]]; then
         kmom_eslint "$silent" "$kmom" "public/"
@@ -353,9 +389,9 @@ kmom_summary ()
 
     if [[ $silent ]]; then
         if (( success == 0)); then
-            echo "✅ $kmom OK 😀."
+            echo "✅ 😎 $kmom OK."
         else
-            echo "🚫 $kmom något saknas, kör en egen rapport för $kmom och fixa det 🔧."
+            echo "🚫 🔧 $kmom något saknas, kör en egen rapport för $kmom och fixa det."
         fi
     fi
 }
@@ -416,9 +452,9 @@ app_labbmiljo ()
 
     check_branches || ([[ ! $silent ]] && check_branches verbose)
     if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ $kmom alla branches är på plats 🫡."
+        [[ $silent ]] || echo "✅ 😀 $kmom alla branches är på plats."
     else
-        [[ $silent ]] || echo "🚫 $kmom någon branch saknas eller har fel namn, fixa det 🔧."
+        [[ $silent ]] || echo "🚫 🔧 $kmom någon branch saknas eller har fel namn, fixa det."
         success=1
     fi
 
@@ -449,8 +485,9 @@ app_kmom01 ()
     local pathArray="PATHS_KMOM01[@]"
     local versionMin="v1.0.0"
     local versionMax="v2.0.0"
+    local lab="lab_01"
 
-    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
     res=$?
     (( res != 0 )) && success=$res
 
@@ -471,8 +508,9 @@ app_kmom02 ()
     local pathArray="PATHS_KMOM02[@]"
     local versionMin="v2.0.0"
     local versionMax="v3.0.0"
+    local lab="lab_02"
 
-    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
     res=$?
     (( res != 0 )) && success=$res
 
@@ -493,8 +531,9 @@ app_kmom03 ()
     local pathArray="PATHS_KMOM03[@]"
     local versionMin="v3.0.0"
     local versionMax="v4.0.0"
+    local lab="lab_03"
 
-    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax"
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
     res=$?
     (( res != 0 )) && success=$res
 
@@ -517,14 +556,19 @@ main ()
     do
         case "$1" in
 
+            --help | -h)
+                usage
+                exit 0
+            ;;
+
             --no-eslint)
                 NO_ESLINT=1
                 shift
             ;;
 
-            --help | -h)
-                usage
-                exit 0
+            --pass-lab)
+                PASS_LAB="-s"
+                shift
             ;;
 
             --verbose | -v)

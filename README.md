@@ -14,7 +14,7 @@ npm i @dbwebb/webtec
 
 
 
-## Update
+### Update
 
 You can update to the latest version like this.
 
