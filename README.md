@@ -52,6 +52,25 @@ npx @dbwebb/webtec check --help
 ```
 
 
+### Execute subcommand `check lab`
+
+This command prints out the summary row from a lab and visualises the points on each lab. This is used to show a summary of the points of several labs.
+
+You can use it like this to show the results from one lab.
+
+```
+# Show the result from one lab
+npx @dbwebb/webtec check lab lab_01
+```
+
+You can use it like this to show the results from several labs.
+
+```
+# Show the result from one lab
+npx @dbwebb/webtec check lab lab_01 lab_02
+```
+
+
 
 ## To be done
 

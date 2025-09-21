@@ -36,10 +36,11 @@ usage ()
 "Usage: $SCRIPT check [options] <command> [arguments]"
 ""
 "Command:"
-"  labbmiljo                        Checks related to the labbmiljö."
-"  kmom01                           Checks related to kmom01."
-"  kmom02                           Checks related to kmom02."
-"  kmom03                           Checks related to kmom03."
+"  lab <lab_01 lab_02 lab_03 lab_04> Checks and prints the specified labs."
+"  labbmiljo                         Checks related to the labbmiljö."
+"  kmom01                            Checks related to kmom01."
+"  kmom02                            Checks related to kmom02."
+"  kmom03                            Checks related to kmom03."
 ""
 "Options:"
 "  --no-eslint    Ignore checking with eslint."
@@ -371,7 +372,6 @@ kmom_do ()
 
     # Räkna antalet commits
     # npx http-server och testa de routes som skall fungera
-    # Kör labben och se till att den är minst 15p, visa även om det är bättre
 
     kmom_summary "$silent" $success "$kmom"
 }
@@ -439,7 +439,45 @@ PATHS_KMOM03=(
 
 
 ##
-# Check a specific kmom.
+# Check the labs.
+#
+app_lab ()
+{
+    local success=0
+    local res=
+    local ret=
+
+    for lab in "$@"; do
+        if [[ -d lab/$lab ]]; then
+            res=$( cd "lab/$lab" || return 0; node lab "$PASS_LAB" )
+            ret=$?
+            res=$(echo "$res" | tail -3 | head -1)
+            res=${res:2}
+        else
+            res="directory is missing"
+            ret=0
+        fi
+
+        if (( ret >= 21 )); then
+            echo "✅ 🙌 $lab $res ${ret}p."
+        elif (( ret >= 19 )); then
+            echo "✅ 😍 $lab $res ${ret}p."
+        elif (( ret >= 15 )); then
+            echo "✅ 😁 $lab $res ${ret}p."
+        else
+            echo "🚫 🔧 $lab $res ${ret}p."
+            success=1
+        fi
+
+    done
+
+    return $success
+}
+
+
+
+##
+# Check a specific part of the course.
 #
 app_labbmiljo ()
 {
@@ -581,7 +619,8 @@ main ()
                 exit 0
             ;;
 
-            labbmiljo        \
+            lab              \
+            | labbmiljo      \
             | kmom01         \
             | kmom02         \
             | kmom03         \
