@@ -43,10 +43,11 @@ usage ()
 "  kmom03                            Checks related to kmom03."
 ""
 "Options:"
-"  --no-eslint    Ignore checking with eslint."
-"  --pass-lab     Run the lab towards the solution file to pass the check."
-"  --help, -h     Print help."
-"  --version, -h  Print version."
+"  --only-this         Check only the specific kmom, no previous ones."
+"  --no-eslint         Ignore checking with eslint."
+"  --pass-lab          Run the lab towards the solution file to pass the check."
+"  --help, -h          Print help."
+"  --version, -h       Print version."
     )
 
     printf "%s\\n" "${txt[@]}"
@@ -295,7 +296,7 @@ kmom_eslint ()
 
     (( NO_ESLINT )) && return 0
 
-    res=$( npx eslint public )
+    res=$( npx eslint $path )
     if (( $? == 0 )); then
         [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
     else
@@ -351,8 +352,10 @@ kmom_do ()
     local versionMax="$6"
     local lab="$7"
 
-    app_"$previous_kmom" silent
-    (( $? != 0 )) && success=2
+    if [[ ! $ONLY_THIS ]]; then
+        app_"$previous_kmom" silent
+        (( $? != 0 )) && success=2
+    fi
 
     kmom_check_paths "$silent" "$pathArray"
     (( $? != 0 )) && success=1
@@ -366,8 +369,10 @@ kmom_do ()
     fi
 
     if [[ ! $silent ]]; then
-        kmom_eslint "$silent" "$kmom" "public/"
-        (( $? != 0 )) && success=1
+        if [[ $kmom != "labbmiljo" ]]; then
+            kmom_eslint "$silent" "$kmom" "public/"
+            (( $? != 0 )) && success=1
+        fi
     fi
 
     # Räkna antalet commits
@@ -496,11 +501,6 @@ app_labbmiljo ()
         success=1
     fi
 
-    if [[ ! $silent ]]; then
-        kmom_eslint "$silent" "$kmom" "./"
-        (( $? != 0 )) && success=1
-    fi
-
     # Kolla att repot har rätt namn
     # npx http-server ?
 
@@ -597,6 +597,11 @@ main ()
             --help | -h)
                 usage
                 exit 0
+            ;;
+
+            --only-this)
+                ONLY_THIS=1
+                shift
             ;;
 
             --no-eslint)
