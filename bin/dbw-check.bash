@@ -44,6 +44,7 @@ usage ()
 ""
 "Options:"
 "  --only-this         Check only the specific kmom, no previous ones."
+"  --no-branch         Ignore checking branches."
 "  --no-eslint         Ignore checking with eslint."
 "  --pass-lab          Run the lab towards the solution file to pass the check."
 "  --help, -h          Print help."
@@ -213,6 +214,8 @@ check_branches ()
     )
     local success=0
 
+    (( NO_BRANCH )) && return 0
+
     for branch in "${branches[@]}"; do
         if git show-ref --verify --quiet "refs/heads/$branch"; then
             [[ -n "$verbose" ]] && echo "✅ $branch finns lokalt"
@@ -320,6 +323,7 @@ kmom_check_lab ()
     local success=0
     local res=
 
+    [[ -d  lab/$lab ]] || return 0
     res=$( cd "lab/$lab" || return 0; node lab "$PASS_LAB" )
     res=$?
     if (( res >= 21 )); then
@@ -601,6 +605,11 @@ main ()
 
             --only-this)
                 ONLY_THIS=1
+                shift
+            ;;
+
+            --no-branch)
+                NO_BRANCH=1
                 shift
             ;;
 
