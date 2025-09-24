@@ -46,6 +46,7 @@ usage ()
 "Options:"
 "  --only-this         Check only the specific kmom, no previous ones."
 "  --no-branch         Ignore checking branches."
+"  --no-color          Do not colourize the output."
 "  --no-eslint         Ignore checking with eslint."
 "  --pass-lab          Run the lab towards the solution file to pass the check."
 "  --help, -h          Print help."
@@ -482,6 +483,8 @@ app_lab ()
             ret=0
         fi
 
+        [[ $NO_COLOR ]] && res=$( echo "$res" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" )
+
         if (( ret >= 21 )); then
             echo "✅ 🙌 $lab $res ${ret}p."
         elif (( ret >= 19 )); then
@@ -625,6 +628,11 @@ main ()
 
             --no-branch)
                 NO_BRANCH=1
+                shift
+            ;;
+
+            --no-color)
+                NO_COLOR=1
                 shift
             ;;
 
