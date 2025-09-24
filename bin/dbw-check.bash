@@ -300,12 +300,12 @@ kmom_eslint ()
 
     (( NO_ESLINT )) && return 0
 
-    res=$( npx eslint "$path" --color )
+    res=$( npx eslint "$path" )
     if (( $? == 0 )); then
         [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
     else
         [[ $silent ]] || echo "🚫 🔧 $kmom eslint hittade fel, kör eslint mot $path och fixa det."
-        [[ $VERBOSE ]] && printf "%b" "$res"
+        [[ $VERBOSE ]] && echo "$res"
         success=1
     fi
 
