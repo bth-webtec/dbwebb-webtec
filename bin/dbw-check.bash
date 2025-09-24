@@ -36,6 +36,7 @@ usage ()
 "Usage: $SCRIPT check [options] <command> [arguments]"
 ""
 "Command:"
+"  eslint                            Checks executed by eslint."
 "  lab <lab_01 lab_02 lab_03 lab_04> Checks and prints the specified labs."
 "  labbmiljo                         Checks related to the labbmiljö."
 "  kmom01                            Checks related to kmom01."
@@ -299,11 +300,12 @@ kmom_eslint ()
 
     (( NO_ESLINT )) && return 0
 
-    res=$( npx eslint $path )
+    res=$( npx eslint "$path" --color )
     if (( $? == 0 )); then
         [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
     else
         [[ $silent ]] || echo "🚫 🔧 $kmom eslint hittade fel, kör eslint mot $path och fixa det."
+        [[ $VERBOSE ]] && printf "%b" "$res"
         success=1
     fi
 
@@ -444,6 +446,19 @@ PATHS_KMOM03=(
     "public/css/onepage.css"
     "public/js/onepage.js"
 )
+
+
+
+##
+# Check using eslint.
+#
+app_eslint ()
+{
+    local target="${1:-public}"
+
+    kmom_eslint "" "" "$target"
+    return $?
+}
 
 
 
@@ -633,7 +648,8 @@ main ()
                 exit 0
             ;;
 
-            lab              \
+            eslint           \
+            | lab            \
             | labbmiljo      \
             | kmom01         \
             | kmom02         \
