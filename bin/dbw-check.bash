@@ -44,6 +44,7 @@ usage ()
 "  kmom03                            Checks related to kmom03."
 ""
 "Options:"
+"  --eslint-fix        Run eslint fix to see if some validation errors disappear."
 "  --only-this         Check only the specific kmom, no previous ones."
 "  --no-branch         Ignore checking branches."
 "  --no-color          Do not colourize the output."
@@ -306,6 +307,12 @@ kmom_eslint ()
         [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
     else
         [[ $silent ]] || echo "🚫 🔧 $kmom eslint hittade fel, kör eslint mot $path och fixa det."
+        if [[ $ESLINT_FIX ]]; then
+            [[ $silent ]] || echo "$res" | tail -1
+            [[ $silent ]] || printf "\n🙈 🔧 Försöker laga felen med 'eslint --fix och provar igen..."
+            res=$( npx eslint "$path" --fix )
+            res=$( npx eslint "$path" )
+        fi
         [[ $VERBOSE ]] && echo "$res"
         success=1
     fi
@@ -615,6 +622,11 @@ main ()
     while (( $# ))
     do
         case "$1" in
+
+            --eslint-fix)
+                ESLINT_FIX=1
+                shift
+            ;;
 
             --help | -h)
                 usage
