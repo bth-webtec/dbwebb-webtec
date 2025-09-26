@@ -309,9 +309,12 @@ kmom_eslint ()
         [[ $silent ]] || echo "🚫 🔧 $kmom eslint hittade fel, kör eslint mot $path och fixa det."
         if [[ $ESLINT_FIX ]]; then
             [[ $silent ]] || echo "$res" | tail -1
-            [[ $silent ]] || printf "\n🙈 🔧 Försöker laga felen med 'eslint --fix och provar igen..."
+            [[ $silent ]] || printf "\n🙈 🔧 Försöker laga felen med 'eslint --fix och provar igen...\n"
             res=$( npx eslint "$path" --fix )
             res=$( npx eslint "$path" )
+            if (( $? == 0 )); then
+                [[ $silent ]] || echo "✅ 😀 $kmom eslint passerar."
+            fi
         fi
         [[ $VERBOSE ]] && echo "$res"
         success=1
