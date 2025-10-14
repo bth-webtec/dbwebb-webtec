@@ -39,6 +39,10 @@ npx @dbwebb/webtec check labbmiljo
 npx @dbwebb/webtec check kmom01
 npx @dbwebb/webtec check kmom02
 npx @dbwebb/webtec check kmom03
+npx @dbwebb/webtec check kmom04
+npx @dbwebb/webtec check kmom05
+npx @dbwebb/webtec check kmom06
+npx @dbwebb/webtec check kmom10
 ```
 
 When you run kmom01, it will also check labbmiljo.
@@ -72,6 +76,7 @@ npx @dbwebb/webtec check lab lab_01 lab_02
 
 
 
+<!--
 ## To be done
 
 These will be supported but are yet not implemented.
@@ -82,7 +87,7 @@ npx @dbwebb/webtec check kmom05
 npx @dbwebb/webtec check kmom06
 npx @dbwebb/webtec check kmom10
 ```
-
+-->
 
 
 

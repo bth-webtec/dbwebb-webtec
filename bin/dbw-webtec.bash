@@ -5,7 +5,7 @@
 export SCRIPT="@dbwebb/webtec"
 
 # Current version
-export VERSION="1.11.2"
+export VERSION="2.0.0"
 
 
 

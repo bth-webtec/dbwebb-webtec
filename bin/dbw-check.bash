@@ -42,6 +42,10 @@ usage ()
 "  kmom01                            Checks related to kmom01."
 "  kmom02                            Checks related to kmom02."
 "  kmom03                            Checks related to kmom03."
+"  kmom04                            Checks related to kmom04."
+"  kmom05                            Checks related to kmom05."
+"  kmom06                            Checks related to kmom06."
+"  kmom10                            Checks related to kmom10."
 ""
 "Options:"
 "  --eslint-fix        Run eslint fix to see if some validation errors disappear."
@@ -278,9 +282,9 @@ kmom_check_tag ()
 
     res=$( hasGitTagBetween "$dir" "$tagMin" "$tagMax" )
     if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ 😀 $kmom repot har tag $res."
+        [[ $silent ]] || echo "✅ 😀 $kmom repot har tagg $res."
     else
-        [[ $silent ]] || echo "🚫 🔧 $kmom repot saknar tagg >=$2 and <$3, fixa det."
+        [[ $silent ]] || echo "🚫 🔧 $kmom repot saknar tagg >=$3 and <$4, fixa det."
         success=1
     fi
 
@@ -458,6 +462,32 @@ PATHS_KMOM03=(
     "public/js/onepage.js"
 )
 
+PATHS_KMOM04=(
+    "lab/"
+    "lab/lab_04/"
+    "public/dom.html"
+    "public/css/dom.css"
+    "public/js/dom.js"
+)
+
+PATHS_KMOM05=(
+    "public/fetch.html"
+    "public/css/fetch.css"
+    "public/js/fetch.js"
+)
+
+PATHS_KMOM06=(
+    "public/duckhunt.html"
+    "public/css/duckhunt.css"
+    "public/js/duckhunt.js"
+)
+
+PATHS_KMOM10=(
+    "public/project.html"
+    "public/css/project.css"
+    "public/js/project.js"
+)
+
 
 
 ##
@@ -608,6 +638,98 @@ app_kmom03 ()
     (( res != 0 )) && success=$res
 
     # kontrollera att PR är korrekt gjord för kmom03
+
+    return $success
+}
+
+
+
+##
+# Check a specific kmom.
+#
+app_kmom04 ()
+{
+    local success=0
+    local silent="$1"
+    local previous_kmom="labbmiljo"
+    local kmom="kmom04"
+    local pathArray="PATHS_KMOM04[@]"
+    local versionMin="v4.0.0"
+    local versionMax="v5.0.0"
+    local lab="lab_04"
+
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
+    res=$?
+    (( res != 0 )) && success=$res
+
+    return $success
+}
+
+
+
+##
+# Check a specific kmom.
+#
+app_kmom05 ()
+{
+    local success=0
+    local silent="$1"
+    local previous_kmom="kmom04"
+    local kmom="kmom05"
+    local pathArray="PATHS_KMOM05[@]"
+    local versionMin="v5.0.0"
+    local versionMax="v6.0.0"
+    local lab="no"
+
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
+    res=$?
+    (( res != 0 )) && success=$res
+
+    return $success
+}
+
+
+
+##
+# Check a specific kmom.
+#
+app_kmom06 ()
+{
+    local success=0
+    local silent="$1"
+    local previous_kmom="kmom05"
+    local kmom="kmom06"
+    local pathArray="PATHS_KMOM06[@]"
+    local versionMin="v6.0.0"
+    local versionMax="v7.0.0"
+    local lab=""
+
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
+    res=$?
+    (( res != 0 )) && success=$res
+
+    return $success
+}
+
+
+
+##
+# Check a specific kmom.
+#
+app_kmom10 ()
+{
+    local success=0
+    local silent="$1"
+    local previous_kmom="no"
+    local kmom="kmom10"
+    local pathArray="PATHS_KMOM10[@]"
+    local versionMin="v7.0.0"
+    local versionMax="v11.0.0"
+    local lab=""
+
+    kmom_do "$silent" "$previous_kmom" "$kmom" "$pathArray" "$versionMin" "$versionMax" "$lab"
+    res=$?
+    (( res != 0 )) && success=$res
 
     return $success
 }
