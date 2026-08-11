@@ -50,7 +50,6 @@ usage ()
 "Options:"
 "  --eslint-fix        Run eslint fix to see if some validation errors disappear."
 "  --only-this         Check only the specific kmom, no previous ones."
-"  --no-branch         Ignore checking branches."
 "  --no-color          Do not colourize the output."
 "  --no-eslint         Ignore checking with eslint."
 "  --pass-lab          Run the lab towards the solution file to pass the check."
@@ -200,44 +199,6 @@ check_paths ()
             [[ -n "$verbose" ]] && echo "❌ $path"
             success=1
         fi
-    done
-
-    return $success
-}
-
-
-
-##
-# Check if a set of branches exists in the repo.
-#
-check_branches ()
-{
-    local verbose="$1"
-    local branches=(
-        "main"
-        "bth/submit/kmom03"
-        "bth/submit/kmom06"
-        "bth/submit/kmom10"
-    )
-    local success=0
-
-    (( NO_BRANCH )) && return 0
-
-    for branch in "${branches[@]}"; do
-        if git show-ref --verify --quiet "refs/heads/$branch"; then
-            [[ -n "$verbose" ]] && echo "✅ $branch finns lokalt"
-        else
-            [[ -n "$verbose" ]] && echo "❌ $branch saknas lokalt"
-            success=1
-        fi
-
-        # Remote branches
-        # if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
-        #     [[ -n "$verbose" ]] && echo "✅ $branch finns i din remote"
-        # else
-        #     [[ -n "$verbose" ]] && echo "❌ $branch saknas i din remote"
-        #     success=1
-        # fi
     done
 
     return $success
@@ -400,6 +361,8 @@ kmom_do ()
     # npx http-server och testa de routes som skall fungera
 
     kmom_summary "$silent" $success "$kmom"
+
+    return $success
 }
 
 
@@ -554,14 +517,6 @@ app_labbmiljo ()
 
     kmom_check_paths "$silent" PATHS_LABBMILJO[@]
     success=$?
-
-    check_branches || ([[ ! $silent ]] && check_branches verbose)
-    if (( $? == 0 )); then
-        [[ $silent ]] || echo "✅ 😀 $kmom alla branches är på plats."
-    else
-        [[ $silent ]] || echo "🚫 🔧 $kmom någon branch saknas eller har fel namn, fixa det."
-        success=1
-    fi
 
     # Kolla att repot har rätt namn
     # npx http-server ?
@@ -760,11 +715,6 @@ main ()
 
             --only-this)
                 ONLY_THIS=1
-                shift
-            ;;
-
-            --no-branch)
-                NO_BRANCH=1
                 shift
             ;;
 
