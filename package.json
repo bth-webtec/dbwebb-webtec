@@ -13,7 +13,8 @@
   "author": "Mikael Roos, Kenneth Lewenhagen",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version": "node scripts/sync-version.js && git add bin/dbw-webtec.bash"
   },
   "publishConfig": {
     "access": "public"
