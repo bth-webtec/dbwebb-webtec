@@ -12,6 +12,9 @@
 # Name of the script
 #SCRIPT=$( basename "$0" )
 
+# Directory this script lives in, used to locate sibling helper scripts
+SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+
 ##
 # Message to display for version.
 #
@@ -321,6 +324,30 @@ kmom_check_lab ()
 
 
 ##
+# Check that the report text for a kmom exists and has some substance
+#
+kmom_check_report_text ()
+{
+    local silent="$1"
+    local kmom="$2"
+    local success=0
+    local res=
+
+    res=$( node "$SCRIPT_DIR/dbw-check-report-text.js" "public/report.html" "$kmom" )
+    if (( $? == 0 )); then
+        [[ $silent ]] || echo "✅ 😀 $kmom redovisningstexten finns och är tillräckligt lång."
+    else
+        [[ $silent ]] || echo "🚫 🔧 $kmom redovisningstexten saknas eller är för kort, fyll i den i public/report.html."
+        [[ $VERBOSE ]] && echo "$res"
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
 # Do tests for a kmom.
 #
 kmom_do ()
@@ -349,6 +376,9 @@ kmom_do ()
         kmom_check_lab "$silent" "$kmom" "$lab"
         (( $? != 0 )) && success=1
     fi
+
+    kmom_check_report_text "$silent" "$kmom"
+    (( $? != 0 )) && success=1
 
     if [[ ! $silent ]]; then
         if [[ $kmom != "labbmiljo" ]]; then
