@@ -258,6 +258,51 @@ kmom_check_tag ()
 
 
 ##
+# Fetch and cache the tags that exist on the origin remote, so a full
+# chained check (kmom06 -> kmom05 -> ... -> labbmiljo) only hits the
+# network once.
+#
+getRemoteTags ()
+{
+    if [[ ! $REMOTE_TAGS_FETCHED ]]; then
+        REMOTE_TAGS=$( git ls-remote --tags origin 2>/dev/null )
+        REMOTE_TAGS_FETCHED=1
+    fi
+
+    echo "$REMOTE_TAGS"
+}
+
+
+
+##
+# Check that the tag found for the kmom has actually been pushed to origin.
+#
+kmom_check_tag_pushed ()
+{
+    local silent="$1"
+    local kmom="$2"
+    local tagMin="$3"
+    local tagMax="$4"
+    local dir="."
+    local success=0
+    local tag=
+
+    tag=$( hasGitTagBetween "$dir" "$tagMin" "$tagMax" 2>/dev/null )
+    (( $? != 0 )) && return 0
+
+    if getRemoteTags | grep -q "refs/tags/${tag}\$"; then
+        [[ $silent ]] || echo "✅ 😀 $kmom taggen $tag är pushad till GitHub."
+    else
+        [[ $silent ]] || echo "🚫 🔧 $kmom taggen $tag finns lokalt men är inte pushad, kör 'git push --tags'."
+        success=1
+    fi
+
+    return $success
+}
+
+
+
+##
 # Check repo passes eslint
 #
 kmom_eslint ()
@@ -370,6 +415,9 @@ kmom_do ()
     (( $? != 0 )) && success=1
 
     kmom_check_tag "$silent" "$kmom" "$versionMin" "$versionMax"
+    (( $? != 0 )) && success=1
+
+    kmom_check_tag_pushed "$silent" "$kmom" "$versionMin" "$versionMax"
     (( $? != 0 )) && success=1
 
     if [[ $lab ]]; then
