@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
@@ -30,8 +30,9 @@ jobs:
             exit 1
           fi
 
-      # actions/setup-node's node 20 bundles an npm older than 11.5.1,
-      # which predates Trusted Publishing (OIDC) support.
-      - run: npm install -g npm@latest
+      # actions/setup-node's npm predates 11.5.1, needed for Trusted
+      # Publishing (OIDC) support. Pin to the 11.x line rather than
+      # @latest — npm 12 requires a newer Node than we run here.
+      - run: npm install -g npm@11
 
       - run: npm publish
