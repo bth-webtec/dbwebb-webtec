@@ -11,6 +11,10 @@
     "bash"
   ],
   "author": "Mikael Roos, Kenneth Lewenhagen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bth-webtec/dbwebb-webtec.git"
+  },
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -24,7 +28,7 @@
     "bin"
   ],
   "bin": {
-    "webtec": "./bin/dbw-webtec.bash"
+    "webtec": "bin/dbw-webtec.bash"
   },
   "dependencies": {
     "acorn": "^8.15.0"
