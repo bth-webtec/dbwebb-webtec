@@ -5,11 +5,13 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +23,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Verify tag matches package.json version
+        run: |
+          if [ "$(node -p "require('./package.json').version")" != "${GITHUB_REF_NAME#v}" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $(node -p "require('./package.json').version")"
+            exit 1
+          fi
+
+      # actions/setup-node's node 20 bundles an npm older than 11.5.1,
+      # which predates Trusted Publishing (OIDC) support.
+      - run: npm install -g npm@latest
+
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
