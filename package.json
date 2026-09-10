@@ -18,7 +18,8 @@
   "type": "module",
   "scripts": {
     "test": "bats test",
-    "version": "node scripts/sync-version.js && git add bin/dbw-webtec.bash"
+    "version": "node scripts/sync-version.js && git add bin/dbw-webtec.bash",
+    "prepare": "husky"
   },
   "publishConfig": {
     "access": "public"
@@ -34,6 +35,7 @@
     "acorn": "^8.15.0"
   },
   "devDependencies": {
-    "bats": "^1.13.0"
+    "bats": "^1.13.0",
+    "husky": "^9.1.7"
   }
 }
