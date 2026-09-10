@@ -23,9 +23,17 @@ version ()
 
 
 
-#SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCRIPT_PATH="$(realpath "$0")"
-SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+# Resolve the real path to this script, following symlinks (npm installs
+# this as a symlink in node_modules/.bin). Avoid the `realpath` command,
+# which isn't installed by default on macOS.
+SCRIPT_PATH="$0"
+while [ -h "$SCRIPT_PATH" ]; do
+    SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+    [[ "$SCRIPT_PATH" != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+SCRIPT_PATH="$SCRIPT_DIR/$(basename "$SCRIPT_PATH")"
 
 SUBCOMMAND="$1"
 shift

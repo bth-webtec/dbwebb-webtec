@@ -12,8 +12,18 @@
 # Name of the script
 #SCRIPT=$( basename "$0" )
 
-# Directory this script lives in, used to locate sibling helper scripts
-SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+# Directory this script lives in, used to locate sibling helper scripts.
+# Resolve symlinks manually (npm installs this as a symlink in
+# node_modules/.bin) instead of relying on `realpath`, which isn't
+# installed by default on macOS.
+_source="$0"
+while [ -h "$_source" ]; do
+    _dir="$(cd -P "$(dirname "$_source")" && pwd)"
+    _source="$(readlink "$_source")"
+    [[ "$_source" != /* ]] && _source="$_dir/$_source"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$_source")" && pwd)"
+unset _source _dir
 
 ##
 # Message to display for version.
