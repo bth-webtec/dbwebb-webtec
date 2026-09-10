@@ -874,4 +874,8 @@ main ()
     fi
 }
 
-main "$@"
+# Guard so the test suite can source this file (to unit-test the helper
+# functions above) without triggering a full CLI run.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

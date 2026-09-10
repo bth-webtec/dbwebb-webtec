@@ -17,7 +17,7 @@
   },
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bats test",
     "version": "node scripts/sync-version.js && git add bin/dbw-webtec.bash"
   },
   "publishConfig": {
@@ -32,5 +32,8 @@
   },
   "dependencies": {
     "acorn": "^8.15.0"
+  },
+  "devDependencies": {
+    "bats": "^1.13.0"
   }
 }
