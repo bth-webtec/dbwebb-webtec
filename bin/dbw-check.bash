@@ -65,6 +65,11 @@ usage ()
 "  --only-this         Check only the specific kmom, no previous ones."
 "  --no-color          Do not colourize the output."
 "  --no-eslint         Ignore checking with eslint."
+"  --no-check-pushed-tags"
+"                      Skip checking that the kmom tag was pushed to origin"
+"                      (needs git ls-remote/network access to origin - use"
+"                      this where that access isn't available, e.g. a"
+"                      sandboxed grading environment)."
 "  --pass-lab          Run the lab towards the solution file to pass the check."
 "  --help, -h          Print help."
 "  --version, -h       Print version."
@@ -296,6 +301,8 @@ kmom_check_tag_pushed ()
     local dir="."
     local success=0
     local tag=
+
+    (( NO_TAG_PUSHED_CHECK )) && return 0
 
     tag=$( hasGitTagBetween "$dir" "$tagMin" "$tagMax" 2>/dev/null )
     (( $? != 0 )) && return 0
@@ -813,6 +820,11 @@ main ()
 
             --no-eslint)
                 NO_ESLINT=1
+                shift
+            ;;
+
+            --no-check-pushed-tags)
+                NO_TAG_PUSHED_CHECK=1
                 shift
             ;;
 

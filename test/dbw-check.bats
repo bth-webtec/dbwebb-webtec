@@ -125,12 +125,32 @@ make_tagged_repo() {
     [[ "$output" == *"inte pushad"* ]]
 }
 
+@test "kmom_check_tag_pushed succeeds without checking origin when NO_TAG_PUSHED_CHECK is set" {
+    local clone="$TEST_TMPDIR/clone"
+    git init -q "$clone"
+    git -C "$clone" -c user.email=test@example.com -c user.name=test commit -q --allow-empty -m init
+    git -C "$clone" tag "v1.5.0"
+    # deliberately not pushed, and no origin remote configured at all
+
+    cd "$clone"
+    NO_TAG_PUSHED_CHECK=1
+    run kmom_check_tag_pushed "" "kmom01" "1.0.0" "2.0.0"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+}
+
 # --- CLI behaviour (subprocess, black-box) ----------------------------------
 
 @test "--help prints usage and exits 0" {
     run bash "$BIN_DIR/dbw-check.bash" --help
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
+}
+
+@test "--help lists --no-check-pushed-tags" {
+    run bash "$BIN_DIR/dbw-check.bash" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"--no-check-pushed-tags"* ]]
 }
 
 @test "--version prints the version" {

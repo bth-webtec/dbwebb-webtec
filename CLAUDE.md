@@ -80,3 +80,11 @@ This also runs fine inside a student's own `.github/workflows/check.yml` (in the
 not this one): `actions/checkout@v4` with `fetch-depth: 0` fetches tags locally, and
 `actions/checkout`'s embedded `GITHUB_TOKEN` auth header covers the `git ls-remote` network call
 too, so no extra permissions or secrets are needed there.
+
+**`--no-check-pushed-tags`** (`NO_TAG_PUSHED_CHECK`) skips `kmom_check_tag_pushed` entirely
+(mirrors the existing `--no-eslint`/`NO_ESLINT` pattern). Added because the `owner`/`dbw`
+grading tool runs `@dbwebb/webtec` inside a Docker sandbox (`node:24-slim`, no ssh binary, no
+ca-certificates, and the repo is private anyway) that has no GitHub auth at all, so
+`git ls-remote --tags origin` fails silently in there and every tag shows as "finns lokalt men
+är inte pushad" even when it genuinely was pushed. Use this flag wherever `git ls-remote`/GitHub
+network access to `origin` isn't available, not just in that sandbox.
