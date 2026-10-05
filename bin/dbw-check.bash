@@ -423,7 +423,7 @@ kmom_do ()
     local versionMax="$6"
     local lab="$7"
 
-    if [[ ! $ONLY_THIS ]]; then
+    if [[ ! $ONLY_THIS && $previous_kmom != "no" ]]; then
         app_"$previous_kmom" silent
         (( $? != 0 )) && success=2
     fi

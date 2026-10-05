@@ -187,3 +187,20 @@ make_tagged_repo() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage:"* ]]
 }
+
+# --- kmom_do without a previous kmom (regression test for kmom10) ----------
+#
+# kmom10 passes previous_kmom="no". kmom_do used to call `app_no`, which
+# doesn't exist, so every kmom10 check exited 2 even when all checks passed.
+
+@test "kmom_do skips the previous-kmom check when previous_kmom is 'no'" {
+    kmom_check_paths() { return 0; }
+    kmom_check_tag() { return 0; }
+    kmom_check_tag_pushed() { return 0; }
+    kmom_check_report_text() { return 0; }
+    kmom_eslint() { return 0; }
+    unset ONLY_THIS
+    run kmom_do "" "no" "kmom10" "PATHS_KMOM10[@]" "v7.0.0" "v11.0.0" ""
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"command not found"* ]]
+}
